@@ -11,11 +11,35 @@ reddit = praw.Reddit(
 
 subreddit = reddit.subreddit("AmItheAsshole")
 
+def load_published():
+    with open('published_submissions.txt', 'rU') as in_file:
+        return in_file.read().split('\n')
+    
+def write_published(current_sub):
+    with open('published_submissions.txt', 'w') as out_file:
+        out_file.write('\n'.join(already_published))
+        out_file.write('\n' + curr.url)
+
+def generate_submission(submissions):
+    for sub in submissions:
+        if sub.url not in already_published:
+            return sub
+    print("No more stories")
+
+
+already_published = load_published()
 
 if __name__ == "__main__":
  
-    for submission in subreddit.hot(limit=3):
-        text = submission.selftext
     
-    print(text)
-    print(type(text))
+    
+    submissions = subreddit.top(time_filter="week", limit=20)
+
+    curr = generate_submission(submissions)
+    
+    write_published(current_sub=curr)
+
+    print(curr.url)
+
+    print(curr.title)
+    
