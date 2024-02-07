@@ -1,0 +1,4 @@
+pymovie
+praw
+requests
+pillow
