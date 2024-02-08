@@ -2,3 +2,4 @@ pymovie
 praw
 requests
 pillow
+TTS
