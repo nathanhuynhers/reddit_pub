@@ -2,6 +2,7 @@
 import pymovie
 import praw
 import requests
+import textwrap
 from PIL import Image, ImageFont, ImageDraw
 
 reddit = praw.Reddit(
@@ -27,9 +28,25 @@ def write_published(current_sub):
 #generates the reddit post we will make a video out of
 def generate_submission(submissions):
     for sub in submissions:
-        if sub.url not in already_published:
+        if sub.url not in already_published and len(sub.title) < 160:
             return sub
     print("No more stories")
+
+#gets the title template and puts the title text onto the template
+def generate_title_image(title):
+    i = Image.open("title_template.jpg")
+    title_image = ImageDraw.Draw(i)
+    fontsize = 25
+    print(fontsize)
+    myfont = ImageFont.truetype('C:/Users/natha/Desktop/reddit_pub/IBMPlexSans-Regular.ttf', fontsize)
+    margin = 20
+    offset = 80
+    for line in textwrap.wrap(title, width=40):
+        title_image.text((margin, offset), line, font=myfont, fill=(0, 0, 0))
+        offset += fontsize
+
+    i.show()
+    i.save("title_temp_curr.jpg")
 
 
 already_published = load_published()
@@ -47,13 +64,7 @@ if __name__ == "__main__":
     title = curr.title
     text = curr.selftext
 
-    i = Image.open("title_template.jpg")
-    title_image = ImageDraw.Draw(i)
-    myfont = ImageFont.truetype('C:/Users/natha/Desktop/reddit_pub/IBMPlexSans-Regular.ttf', 30)
-    title_image.text((60, 100), title, font = myfont, fill=(0, 0, 0))
-    i.show()
+    generate_title_image(title=title)
 
-    print(text)
 
-    print(curr.title)
     
