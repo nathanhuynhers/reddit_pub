@@ -2,4 +2,6 @@ pymovie
 praw
 requests
 pillow
-TTS
+gtts
+pydub
+pyrubberband

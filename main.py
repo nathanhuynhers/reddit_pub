@@ -4,6 +4,16 @@ import praw
 import requests
 import textwrap
 from PIL import Image, ImageFont, ImageDraw
+from gtts import gTTS
+from gtts.tokenizer import pre_processors
+import gtts.tokenizer.symbols
+from pydub import AudioSegment
+from pydub import effects
+import soundfile as sf
+import pyrubberband as pyrb
+import librosa
+
+
 
 reddit = praw.Reddit(
     client_id="OXMNc3nojb2TBjyvAgbJ9w",
@@ -45,7 +55,6 @@ def generate_title_image(title):
         title_image.text((margin, offset), line, font=myfont, fill=(0, 0, 0))
         offset += fontsize
 
-    i.show()
     i.save("title_temp_curr.jpg")
 
 
@@ -65,6 +74,31 @@ if __name__ == "__main__":
     text = curr.selftext
 
     generate_title_image(title=title)
+
+    # tts = TTS("tts_models/en/ljspeech/speedy-speech")
+    # tts.tts_to_file(text=title, output_path="tts_audio_file.wav")
+    gtts.tokenizer.symbols.SUB_PAIRS.append(('AITA', 'Am I the Asshole'))
+    tts = gTTS(text=text)
+    tts.save("tts_audio_file.wav")
+    
+    # data, samplerate = sf.read('tts_audio_file.wav')
+    # # Play back at 1.5X speed
+    # y_stretch = pyrb.time_stretch(data, samplerate, 1.5)
+    # # Play back two 1.5x tones
+    # y_shift = pyrb.pitch_shift(data, samplerate, 1.5)
+    # sf.write("1.5 speedup.wav", y_stretch, samplerate, format='wav')
+
+
+    root = "tts_audio_file.wav"
+    velocidad_X = 1.35 # No puede estar por debajo de 1.0
+
+    sound = AudioSegment.from_file(root)
+    so = sound.speedup(velocidad_X, 150, 25)
+    so.export(root[:-4] + '_Out.wav', format = 'wav')
+
+
+
+
 
 
     
