@@ -1,5 +1,6 @@
 #imports
 import pymovie
+from moviepy.editor import *
 import praw
 import requests
 import textwrap
@@ -57,6 +58,40 @@ def generate_title_image(title):
 
     i.save("title_temp_curr.jpg")
 
+def speedupaudio(root, velocity):
+
+    sound = AudioSegment.from_file(root)
+    so = sound.speedup(velocity, 150, 25)
+    so.export(root[:-4] + '_Out.wav', format = 'wav')
+
+def getduration(root):
+    return librosa.get_duration(filename=root)
+
+def combineaudio(a1, a2):
+    sound1 = AudioSegment.from_wav(a1)
+    sound2 = AudioSegment.from_wav(a2)
+
+    combined = sound1 + sound2
+    combined.export("introandstory.wav", format="wav")
+
+def createvideo():
+    
+    
+    introlength = getduration("audiointro_Out.wav")
+    storylength = getduration("tts_audio_file_Out.wav")
+    combineaudio("audiointro_Out.wav", "tts_audio_file_Out.wav")
+    # video = VideoFileClip("BackgroundVid.mp4").set_duration(introlength + storylength)
+    video = VideoFileClip("BackgroundVid.mp4").set_duration(20) #testing purposes
+
+    title = ImageClip("title_temp_curr.jpg").set_start(0).set_duration(introlength).set_pos(("center","center")).resize(height=180)
+          #.resize(height=50) # if you need to resize...
+    audioclip = AudioFileClip("introandstory.wav")
+    video = video.set_audio(audioclip)
+          
+
+    final = CompositeVideoClip([video, title])
+    final.write_videofile("finalvid.mp4")
+
 
 already_published = load_published()
 
@@ -75,26 +110,20 @@ if __name__ == "__main__":
 
     generate_title_image(title=title)
 
-    # tts = TTS("tts_models/en/ljspeech/speedy-speech")
-    # tts.tts_to_file(text=title, output_path="tts_audio_file.wav")
+
     gtts.tokenizer.symbols.SUB_PAIRS.append(('AITA', 'Am I the Asshole'))
     tts = gTTS(text=text)
-    tts.save("tts_audio_file.wav")
+    tts.save("tts_audio_file.wav")    
+
+    tts = gTTS(text=title)
+    tts.save("audiointro.wav")
+
+    speedupaudio("tts_audio_file.wav", 1.35)
+    speedupaudio("audiointro.wav", 1.35)
+
+    createvideo()
+
     
-    # data, samplerate = sf.read('tts_audio_file.wav')
-    # # Play back at 1.5X speed
-    # y_stretch = pyrb.time_stretch(data, samplerate, 1.5)
-    # # Play back two 1.5x tones
-    # y_shift = pyrb.pitch_shift(data, samplerate, 1.5)
-    # sf.write("1.5 speedup.wav", y_stretch, samplerate, format='wav')
-
-
-    root = "tts_audio_file.wav"
-    velocidad_X = 1.35 # No puede estar por debajo de 1.0
-
-    sound = AudioSegment.from_file(root)
-    so = sound.speedup(velocidad_X, 150, 25)
-    so.export(root[:-4] + '_Out.wav', format = 'wav')
 
 
 
